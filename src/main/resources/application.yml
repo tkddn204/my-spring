@@ -1,10 +1,4 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${MYSQL_USER:<YOUR_USERNAME>}
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/springboard
-    password: ${MYSQL_PASSWORD:<YOUR_PASSWORD>}
-  jpa:
-    hibernate:
-      ddl-auto: update
-#    show-sql: 'true'
+  profiles:
+    active:
+      - dev
