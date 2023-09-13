@@ -1,0 +1,9 @@
+POST http://localhost:8080/api/member/join
+Content-Type: application/json
+
+{
+  "email": "tkddn204@gmail.com",
+  "password": "qwerasdfzxcv1234",
+  "nickname": "rightpair"
+}
+
