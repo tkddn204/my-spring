@@ -22,16 +22,17 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("com.mysql:mysql-connector-j")
-	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.0.4")
+	implementation("org.springframework.boot:spring-boot-starter-validation:3.0.4")
+	implementation("org.springframework.boot:spring-boot-starter-security:3.0.4")
+	implementation("org.springframework.boot:spring-boot-starter-web:3.1.0")
+	compileOnly("org.projectlombok:lombok:1.18.26")
+	developmentOnly("org.springframework.boot:spring-boot-devtools:3.0.4")
+	runtimeOnly("com.mysql:mysql-connector-j:8.0.32")
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:3.0.4")
+	annotationProcessor("org.projectlombok:lombok:1.18.26")
+	testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.0")
+	testImplementation("com.github.javafaker:javafaker:1.0.2")
 }
 
 tasks.withType<Test> {
