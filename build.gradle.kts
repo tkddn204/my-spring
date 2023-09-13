@@ -22,16 +22,16 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.0.4")
-	implementation("org.springframework.boot:spring-boot-starter-validation:3.0.4")
-	implementation("org.springframework.boot:spring-boot-starter-security:3.0.4")
-	implementation("org.springframework.boot:spring-boot-starter-web:3.1.0")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.1.3")
+	implementation("org.springframework.boot:spring-boot-starter-validation:3.1.3")
+	implementation("org.springframework.boot:spring-boot-starter-security:3.1.3")
+	implementation("org.springframework.boot:spring-boot-starter-web:3.1.3")
 	compileOnly("org.projectlombok:lombok:1.18.26")
-	developmentOnly("org.springframework.boot:spring-boot-devtools:3.0.4")
+	developmentOnly("org.springframework.boot:spring-boot-devtools:3.1.3")
 	runtimeOnly("com.mysql:mysql-connector-j:8.0.32")
-	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:3.0.4")
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:3.1.3")
 	annotationProcessor("org.projectlombok:lombok:1.18.26")
-	testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.0")
+	testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.3")
 	testImplementation("com.github.javafaker:javafaker:1.0.2")
 }
 
