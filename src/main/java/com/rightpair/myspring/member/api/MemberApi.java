@@ -2,6 +2,7 @@ package com.rightpair.myspring.member.api;
 
 import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
+import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,15 @@ public record MemberApi(MemberService memberService) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .contentType(MediaType.APPLICATION_JSON)
         .body(memberService.joinMember(request));
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<LoginMemberDto.Response> joinMember(
+      @Valid @RequestBody LoginMemberDto.Request request
+  ) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(memberService.loginMember(request));
   }
 
   @GetMapping("/{id}")

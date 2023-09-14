@@ -2,6 +2,7 @@ package com.rightpair.myspring.member.service;
 
 import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
+import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import jakarta.persistence.EntityExistsException;
@@ -45,6 +46,24 @@ public class MemberService {
 
     return Optional.of(member)
         .map(JoinMemberDto.Response::fromEntity)
-        .orElseThrow(() -> new RuntimeException("createMember Response DTO 변환에 실패했습니다."));
+        .orElseThrow(() -> new RuntimeException("joinMember Response DTO 변환에 실패했습니다."));
   }
+
+  public LoginMemberDto.Response loginMember(LoginMemberDto.Request request) {
+    Member member = memberRepository.findByEmail(request.email())
+        .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
+
+    validatePassword(request.password(), member.getPassword());
+
+    return Optional.of(member)
+        .map(LoginMemberDto.Response::fromEntity)
+        .orElseThrow(() -> new RuntimeException("loginMEmber Response DTO 변환에 실패했습니다."));
+  }
+
+  private void validatePassword(String input, String saved) {
+    if (!passwordEncoder.matches(input, saved)) {
+      throw new IllegalArgumentException("올바른 패스워드가 아닙니다.");
+    }
+  }
+
 }
