@@ -19,7 +19,7 @@ public record MemberApi(MemberService memberService) {
   ) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .contentType(MediaType.APPLICATION_JSON)
-        .body(memberService.createMember(request));
+        .body(memberService.joinMember(request));
   }
 
   @GetMapping("/{id}")

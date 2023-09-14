@@ -30,7 +30,7 @@ public class MemberService {
   }
 
   @Transactional
-  public JoinMemberDto.Response createMember(JoinMemberDto.Request request) {
+  public JoinMemberDto.Response joinMember(JoinMemberDto.Request request) {
     if (memberRepository.existsByEmail(request.email())) {
       throw new EntityExistsException("이미 존재하는 이메일입니다.");
     }
