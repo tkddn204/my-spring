@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
-public class JoinMemberDto {
+public class LoginMemberDto {
 
   @Builder
   public record Request(
@@ -16,10 +16,7 @@ public class JoinMemberDto {
 
       @Size(min = 8, max = 32, message = "비밀번호는 8자 이상 32자 이하여야 합니다.")
       @NotBlank(message = "비밀번호를 입력해 주십시오.")
-      String password,
-
-      @Size(max = 20, message = "닉네임은 최대 20자까지 입력 가능합니다.")
-      String nickname
+      String password
   ) {
   }
 
