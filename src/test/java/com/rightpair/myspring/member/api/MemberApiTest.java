@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
+import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.utils.MemberTestFactory;
@@ -85,6 +86,74 @@ class MemberApiTest extends TestSettings {
           )
           // Then
           .andExpect(status().isBadRequest());
+    }
+  }
+
+  @Nested
+  @DisplayName("유저가 로그인을 할 때")
+  class LoginMemberTest {
+    @Test
+    @DisplayName("양식에 맞게 요청을 제출하면 로그인을 할 수 있다")
+    public void loginMemberTestWithValidData() throws Exception {
+      // Given
+      Member member = MemberTestFactory.createUnEncodedTestMember();
+      Member newMember = MemberTestFactory.createTestMemberFromPassword(member.getPassword());
+      newMember.setEmail(member.getEmail());
+      newMember.setNickname(member.getNickname());
+      Member savedMember = memberRepository.save(newMember);
+      LoginMemberDto.Request request = LoginMemberDto.Request.builder()
+          .email(member.getEmail())
+          .password(member.getPassword())
+          .build();
+      LoginMemberDto.Response expectedResponse = LoginMemberDto.Response.fromEntity(savedMember);
+      String expected = objectMapper.writeValueAsString(expectedResponse);
+
+      // When
+      mockMvc.perform(post("/api/member/login")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsBytes(request))
+          )
+          // Then
+          .andExpect(status().isOk())
+          .andExpect(content().json(expected));
+    }
+
+    @Test
+    @DisplayName("가입하지 않은 이메일로 로그인을 할 수 없다")
+    public void loginMemberTestWithInValidEmail() throws Exception {
+      // Given
+      Member member = MemberTestFactory.createUnEncodedTestMember();
+      LoginMemberDto.Request request = LoginMemberDto.Request.builder()
+          .email("wrong-email@test.com")
+          .password(member.getPassword())
+          .build();
+
+      // When
+      mockMvc.perform(post("/api/member/login")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsBytes(request))
+          )
+          // Then
+          .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("비밀번호가 다르면 로그인을 할 수 없다")
+    public void loginMemberTestWithInValidPassword() throws Exception {
+      // Given
+      Member member = MemberTestFactory.createUnEncodedTestMember();
+      LoginMemberDto.Request request = LoginMemberDto.Request.builder()
+          .email(member.getEmail())
+          .password("wrong-password")
+          .build();
+
+      // When
+      mockMvc.perform(post("/api/member/login")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsBytes(request))
+          )
+          // Then
+          .andExpect(status().isInternalServerError());
     }
   }
 
