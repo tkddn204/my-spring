@@ -25,4 +25,12 @@ public class MemberTestFactory {
         .nickname(faker.name().firstName())
         .build();
   }
+
+  public static Member createTestMemberFromPassword(String password) {
+    return Member.builder()
+        .email(faker.internet().emailAddress())
+        .password(passwordEncoder.encode(password))
+        .nickname(faker.name().firstName())
+        .build();
+  }
 }
