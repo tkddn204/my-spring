@@ -29,9 +29,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-redis:3.1.3")
 
 	// jwt
-	implementation("io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION")
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
 	compileOnly("org.projectlombok:lombok:1.18.26")
 	developmentOnly("org.springframework.boot:spring-boot-devtools:3.1.3")
