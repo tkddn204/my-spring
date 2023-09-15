@@ -1,5 +1,9 @@
 package com.rightpair.myspring.jwt.service;
 
+import com.rightpair.myspring.jwt.dto.JwtTokenPair;
+import com.rightpair.myspring.jwt.dto.RefreshTokenDto;
+import com.rightpair.myspring.jwt.entity.JwtEntity;
+import com.rightpair.myspring.jwt.repository.JwtRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,24 +23,59 @@ import java.util.Date;
 public class JwtService {
   private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
+  private final JwtRepository jwtRepository;
+
   @Value("${jwt.secret}")
   private String SECRET_KEY;
 
   @Value("${jwt.expire.access}")
-  private String ACCESS_EXPIRE_TIME;
+  private Long ACCESS_EXPIRE_TIME;
 
   @Value("${jwt.expire.refresh}")
-  private String REFRESH_EXPIRE_TIME;
+  private Long REFRESH_EXPIRE_TIME;
+
+  public JwtTokenPair createJwtToken(Long memberId) {
+    String subject = String.valueOf(memberId);
+    return JwtTokenPair.builder()
+        .accessToken(createAccessToken(subject, System.currentTimeMillis()))
+        .refreshToken(createRefreshToken(subject, System.currentTimeMillis()))
+        .build();
+  }
 
   public String createAccessToken(String subject, long currentTime) {
-    long expiredTime = Long.parseLong(REFRESH_EXPIRE_TIME);
+    return BEARER_TOKEN_PREFIX + createToken(subject, currentTime, ACCESS_EXPIRE_TIME);
+  }
+
+  public String createRefreshToken(String subject, long currentTime) {
+    String refreshToken = createToken(subject, currentTime, REFRESH_EXPIRE_TIME);
+    jwtRepository.save(
+        JwtEntity.builder()
+            .memberId(Long.parseLong(subject))
+            .refreshToken(refreshToken)
+            .build()
+    );
+    return BEARER_TOKEN_PREFIX + refreshToken;
+  }
+
+  public RefreshTokenDto.Response refreshAccessToken(RefreshTokenDto.Request request) {
+    Claims verifyToken = verifyToken(extractRequestToken(request.refreshToken()));
+    jwtRepository.findById(request.memberId());
+
+    return RefreshTokenDto.Response.builder()
+        .accessToken(createAccessToken(verifyToken.getSubject(), request.currentTime()))
+        .refreshToken(request.refreshToken())
+        .build();
+  }
+
+  public String createToken(String subject, long currentTime, long expiredTime) {
     Date expiration = new Date(currentTime + expiredTime);
 
     try {
       Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-      return BEARER_TOKEN_PREFIX + Jwts.builder()
+      return Jwts.builder()
           .setSubject(subject)
+          .setIssuedAt(new Date(currentTime))
           .setExpiration(expiration)
           .signWith(key, SignatureAlgorithm.HS512)
           .compact();
@@ -52,6 +91,14 @@ public class JwtService {
           .build().parseClaimsJws(token).getBody();
     } catch (JwtException e) {
       throw new RuntimeException(e);
+//    new RuntimeException("JWT 토큰의 기한이 만료되었습니다."));
     }
+  }
+
+  private String extractRequestToken(String refreshToken) {
+    if (refreshToken.startsWith(BEARER_TOKEN_PREFIX)) {
+      return refreshToken.substring(BEARER_TOKEN_PREFIX.length());
+    }
+    throw new RuntimeException("올바른 형식의 권한 요청이 아닙니다.");
   }
 }
