@@ -19,10 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 class MemberApiTest extends TestSettings {
@@ -85,7 +85,8 @@ class MemberApiTest extends TestSettings {
               .content(objectMapper.writeValueAsBytes(request))
           )
           // Then
-          .andExpect(status().isBadRequest());
+          .andExpect(status().isBadRequest())
+          .andExpect(status().reason(containsString("Invalid request content.")));
     }
   }
 
@@ -134,7 +135,8 @@ class MemberApiTest extends TestSettings {
               .content(objectMapper.writeValueAsBytes(request))
           )
           // Then
-          .andExpect(status().isInternalServerError());
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errorCode").value("MEMBER_NOT_FOUND"));
     }
 
     @Test
@@ -153,7 +155,8 @@ class MemberApiTest extends TestSettings {
               .content(objectMapper.writeValueAsBytes(request))
           )
           // Then
-          .andExpect(status().isInternalServerError());
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errorCode").value("MEMBER_NOT_FOUND"));
     }
   }
 
@@ -188,7 +191,8 @@ class MemberApiTest extends TestSettings {
               .contentType(MediaType.APPLICATION_JSON)
           )
           // Then
-          .andExpect(status().isInternalServerError());
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errorCode").value("MEMBER_NOT_FOUND"));
     }
   }
 }

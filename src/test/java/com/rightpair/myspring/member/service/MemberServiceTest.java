@@ -3,10 +3,12 @@ package com.rightpair.myspring.member.service;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
+import com.rightpair.myspring.member.exception.ExistedEmailException;
+import com.rightpair.myspring.member.exception.InvalidPasswordException;
+import com.rightpair.myspring.member.exception.MemberNotFoundException;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.utils.MemberTestFactory;
 import com.rightpair.myspring.utils.TestSettings;
-import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,10 +20,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 class MemberServiceTest extends TestSettings {
 
@@ -37,7 +41,7 @@ class MemberServiceTest extends TestSettings {
 
     @DisplayName("Member 가입을 할 수 있다.")
     @Test
-    void shouldJoinMemberSuccess() {
+    void shouldSuccessToJoin() {
       // Given
       Member member = MemberTestFactory.createUnEncodedTestMember();
       JoinMemberDto.Request request = JoinMemberDto.Request.builder()
@@ -50,27 +54,28 @@ class MemberServiceTest extends TestSettings {
       // When
       JoinMemberDto.Response response = memberService.joinMember(request);
 
-      // Than
-      assertNotNull(response);
+      // Then
+      assertEquals(request.email(), response.email());
+      assertEquals(request.nickname(), response.nickname());
     }
 
-    @DisplayName("이미 가입된 회원의 email일 경우 Member 가입을 할 수 없다.")
+    @DisplayName("이미 가입된 회원의 email이 주어질 경우 Member 가입을 할 수 없다.")
     @Test
-    void shouldJoinMemberFailedWithNotFoundMember() {
+    void shouldFailToJoinWithExistingEmail() {
       // Given
-      Member member = MemberTestFactory.createUnEncodedTestMember();
+      Member joinedMember = MemberTestFactory.createTestMember();
       JoinMemberDto.Request request = JoinMemberDto.Request.builder()
-          .email(member.getEmail())
-          .password(member.getPassword())
-          .nickname(member.getNickname())
+          .email(joinedMember.getEmail())
+          .password(joinedMember.getPassword())
+          .nickname(joinedMember.getNickname())
           .build();
-      given(memberRepository.save(any(Member.class))).willReturn(member);
 
       // When
-      JoinMemberDto.Response response = memberService.joinMember(request);
+      when(memberRepository.existsByEmail(joinedMember.getEmail()))
+          .thenReturn(true);
 
-      // Than
-      assertNotNull(response);
+      // Then
+      assertThrows(ExistedEmailException.class, () -> memberService.joinMember(request));
     }
   }
 
@@ -96,8 +101,8 @@ class MemberServiceTest extends TestSettings {
       // When
       LoginMemberDto.Response response = memberService.loginMember(request);
 
-      // Than
-      assertNotNull(response);
+      // Then
+      assertEquals(request.email(), response.email());
     }
 
     @DisplayName("요청 email에 대응하는 Member 정보가 없으면 로그인을 할 수 없다.")
@@ -112,9 +117,9 @@ class MemberServiceTest extends TestSettings {
 
       // When
       Assertions.assertThatThrownBy(() -> memberService.loginMember(request))
-          .isInstanceOf(EntityNotFoundException.class)
-          // Than
-          .hasMessage("회원이 존재하지 않습니다.");
+          .isInstanceOf(MemberNotFoundException.class)
+          // Then
+          .hasMessage("멤버를 찾을 수 없습니다.");
     }
 
     @DisplayName("요청 비밀번호가 틀리면 로그인을 할 수 없다.")
@@ -130,8 +135,8 @@ class MemberServiceTest extends TestSettings {
 
       // When
       Assertions.assertThatThrownBy(() -> memberService.loginMember(request))
-          .isInstanceOf(IllegalArgumentException.class)
-          // Than
+          .isInstanceOf(InvalidPasswordException.class)
+          // Then
           .hasMessage("올바른 패스워드가 아닙니다.");
     }
   }
