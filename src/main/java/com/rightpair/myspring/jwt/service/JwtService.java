@@ -3,11 +3,10 @@ package com.rightpair.myspring.jwt.service;
 import com.rightpair.myspring.jwt.dto.JwtTokenPair;
 import com.rightpair.myspring.jwt.dto.RefreshTokenDto;
 import com.rightpair.myspring.jwt.entity.JwtEntity;
+import com.rightpair.myspring.jwt.exception.JwtDeniedException;
+import com.rightpair.myspring.jwt.exception.JwtExpiredException;
 import com.rightpair.myspring.jwt.repository.JwtRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -89,9 +88,10 @@ public class JwtService {
       return Jwts.parserBuilder()
           .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
           .build().parseClaimsJws(token).getBody();
+    } catch (ExpiredJwtException e) {
+      throw new JwtExpiredException();
     } catch (JwtException e) {
-      throw new RuntimeException(e);
-//    new RuntimeException("JWT 토큰의 기한이 만료되었습니다."));
+      throw new JwtDeniedException();
     }
   }
 
