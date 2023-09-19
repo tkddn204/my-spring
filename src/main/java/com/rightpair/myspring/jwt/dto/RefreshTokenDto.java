@@ -1,11 +1,9 @@
 package com.rightpair.myspring.jwt.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 public class RefreshTokenDto {
 
-  @AllArgsConstructor
   @Builder
   public record Request(
       Long memberId,
@@ -15,7 +13,6 @@ public class RefreshTokenDto {
   }
 
 
-  @AllArgsConstructor
   @Builder
   public record Response(
       String accessToken,
