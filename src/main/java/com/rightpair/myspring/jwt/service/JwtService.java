@@ -21,7 +21,6 @@ import java.util.Date;
 @Service
 public class JwtService {
   private static final String BEARER_TOKEN_STRING = "Bearer";
-  private static final String BEARER_TOKEN_PREFIX = BEARER_TOKEN_STRING + " ";
 
   private final JwtRepository jwtRepository;
 
@@ -35,8 +34,8 @@ public class JwtService {
   private Long REFRESH_EXPIRE_TIME;
 
   public RefreshTokenDto.Response refreshAccessToken(RefreshTokenDto.Request request) {
-    String realRefreshToken = extractRequestToken(request.refreshToken());
-    Claims verifyToken = verifyToken(realRefreshToken);
+    String refreshToken = request.refreshToken();
+    Claims verifyToken = verifyToken(refreshToken);
 
     // Subject가 다르면 Deny
     if (!String.valueOf(request.memberId()).equals(verifyToken.getSubject())) {
@@ -46,11 +45,11 @@ public class JwtService {
     JwtTokenPair jwtTokenPair = jwtRepository.findById(request.memberId())
         .map(entity -> {
           // 저장되어 있는 토큰과 다르면 Deny
-          if (!entity.refreshToken().equals(realRefreshToken)) {
+          if (!entity.refreshToken().equals(refreshToken)) {
             throw new JwtDeniedException();
           }
           return createJwtTokenPairWithRefreshToken(
-              verifyToken.getSubject(), realRefreshToken
+              verifyToken.getSubject(), refreshToken
           );
         })
         .orElseGet(() -> createJwtTokenPair(request.memberId()));
@@ -120,12 +119,5 @@ public class JwtService {
     } catch (JwtException e) {
       throw new JwtDeniedException();
     }
-  }
-
-  private String extractRequestToken(String refreshToken) {
-    if (refreshToken.startsWith(BEARER_TOKEN_PREFIX)) {
-      return refreshToken.substring(BEARER_TOKEN_PREFIX.length());
-    }
-    throw new JwtDeniedException();
   }
 }

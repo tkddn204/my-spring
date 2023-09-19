@@ -7,6 +7,7 @@ public class RefreshTokenDto {
   @Builder
   public record RefreshRequest(
       Long memberId,
+      String grantType,
       String refreshToken
   ) {
   }
