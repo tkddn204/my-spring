@@ -7,13 +7,13 @@ import com.rightpair.myspring.jwt.exception.JwtDeniedException;
 import com.rightpair.myspring.jwt.exception.JwtExpiredException;
 import com.rightpair.myspring.jwt.repository.JwtRepository;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -58,7 +58,9 @@ public class JwtService {
 
   public RefreshTokenDto.Response refreshAccessToken(RefreshTokenDto.Request request) {
     Claims verifyToken = verifyToken(extractRequestToken(request.refreshToken()));
-    jwtRepository.findById(request.memberId());
+    if (jwtRepository.findById(request.memberId()).isEmpty()) {
+      throw new JwtDeniedException();
+    }
 
     return RefreshTokenDto.Response.builder()
         .accessToken(createAccessToken(verifyToken.getSubject(), request.currentTime()))
@@ -70,7 +72,7 @@ public class JwtService {
     Date expiration = new Date(currentTime + expiredTime);
 
     try {
-      Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+      Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
 
       return Jwts.builder()
           .setSubject(subject)
@@ -86,7 +88,7 @@ public class JwtService {
   public Claims verifyToken(String token) {
     try {
       return Jwts.parserBuilder()
-          .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+          .setSigningKey(Decoders.BASE64.decode(SECRET_KEY))
           .build().parseClaimsJws(token).getBody();
     } catch (ExpiredJwtException e) {
       throw new JwtExpiredException();
@@ -99,6 +101,6 @@ public class JwtService {
     if (refreshToken.startsWith(BEARER_TOKEN_PREFIX)) {
       return refreshToken.substring(BEARER_TOKEN_PREFIX.length());
     }
-    throw new RuntimeException("올바른 형식의 권한 요청이 아닙니다.");
+    throw new JwtDeniedException();
   }
 }
