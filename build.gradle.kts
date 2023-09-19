@@ -26,6 +26,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation:3.1.3")
 	implementation("org.springframework.boot:spring-boot-starter-security:3.1.3")
 	implementation("org.springframework.boot:spring-boot-starter-web:3.1.3")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis:3.1.3")
+
+	// jwt
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
 	compileOnly("org.projectlombok:lombok:1.18.26")
 	developmentOnly("org.springframework.boot:spring-boot-devtools:3.1.3")
 	runtimeOnly("com.mysql:mysql-connector-j:8.0.32")

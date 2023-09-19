@@ -1,4 +1,4 @@
-package com.rightpair.myspring.common.exception;
+package com.rightpair.myspring.common.error;
 
 public record ExceptionResponse(
     ErrorCode errorCode,
