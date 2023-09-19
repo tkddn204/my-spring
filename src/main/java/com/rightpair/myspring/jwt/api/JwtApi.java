@@ -17,9 +17,12 @@ public class JwtApi {
 
   @PostMapping("/api/auth/refresh")
   public ResponseEntity<RefreshTokenDto.Response> refreshAccessToken(
-      @Valid @RequestBody RefreshTokenDto.Request request
+      @Valid @RequestBody RefreshTokenDto.RefreshRequest request
   ) {
-    RefreshTokenDto.Response response = jwtService.refreshAccessToken(request);
+    RefreshTokenDto.Response response = jwtService.refreshAccessToken(
+        RefreshTokenDto.Request.from(request)
+    );
+
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(response);
   }

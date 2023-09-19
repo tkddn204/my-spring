@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles(value = "test")
 class JwtServiceTest extends TestSettings {
@@ -43,7 +42,7 @@ class JwtServiceTest extends TestSettings {
       // when
       Claims claims = Jwts.parserBuilder()
           .setSigningKey(Decoders.BASE64.decode(SECRET_KEY))
-          .build().parseClaimsJws(accessToken.substring(BEARER_TOKEN_PREFIX.length())).getBody();
+          .build().parseClaimsJws(accessToken).getBody();
 
       // then
       assertEquals(String.valueOf(memberId), claims.getSubject());
@@ -65,7 +64,7 @@ class JwtServiceTest extends TestSettings {
       // when
       Claims claims = Jwts.parserBuilder()
           .setSigningKey(Decoders.BASE64.decode(SECRET_KEY))
-          .build().parseClaimsJws(refreshToken.substring(BEARER_TOKEN_PREFIX.length())).getBody();
+          .build().parseClaimsJws(refreshToken).getBody();
 
       // then
       assertEquals(String.valueOf(memberId), claims.getSubject());
@@ -77,27 +76,28 @@ class JwtServiceTest extends TestSettings {
   class RefreshAccessTokenTest {
 
 
-    @DisplayName("리프레시 토큰 재생성에 성공한다.")
+    @DisplayName("액세스 토큰 재생성에 성공한다.")
     @Test
     void shouldSuccessRefreshAccessToken() {
       // given
       Long memberId = 1234L;
-      String refreshToken = jwtService.createRefreshToken(
-          String.valueOf(memberId), System.currentTimeMillis());
+      String subject = String.valueOf(memberId);
+      String accessToken = jwtService.createAccessToken(subject, 1L);
+      String refreshToken = jwtService.createRefreshToken(subject, System.currentTimeMillis());
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
           .memberId(memberId)
-          .refreshToken(refreshToken)
+          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 
       // when
       RefreshTokenDto.Response response = jwtService.refreshAccessToken(request);
-      String refreshTokenStr = response.accessToken().substring(BEARER_TOKEN_PREFIX.length());
       Claims claims = Jwts.parserBuilder()
           .setSigningKey(Decoders.BASE64.decode(SECRET_KEY))
-          .build().parseClaimsJws(refreshTokenStr).getBody();
+          .build().parseClaimsJws(response.refreshToken()).getBody();
 
       // then
+      assertNotEquals(accessToken, response.accessToken());
       assertEquals(String.valueOf(memberId), claims.getSubject());
     }
 
@@ -111,7 +111,7 @@ class JwtServiceTest extends TestSettings {
           String.valueOf(memberId), System.currentTimeMillis());
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
           .memberId(anotherMemberId)
-          .refreshToken(refreshToken)
+          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 
@@ -127,12 +127,11 @@ class JwtServiceTest extends TestSettings {
     void shouldFailWithExpiredRefreshAccessToken() {
       // given
       Long memberId = 1234L;
-      Long anotherMemberId = 54321L;
       String refreshToken = jwtService.createRefreshToken(
           String.valueOf(memberId), 1L);
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
-          .memberId(anotherMemberId)
-          .refreshToken(refreshToken)
+          .memberId(memberId)
+          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 

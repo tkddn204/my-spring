@@ -20,7 +20,8 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Service
 public class JwtService {
-  private static final String BEARER_TOKEN_PREFIX = "Bearer ";
+  private static final String BEARER_TOKEN_STRING = "Bearer";
+  private static final String BEARER_TOKEN_PREFIX = BEARER_TOKEN_STRING + " ";
 
   private final JwtRepository jwtRepository;
 
@@ -33,16 +34,52 @@ public class JwtService {
   @Value("${jwt.expire.refresh}")
   private Long REFRESH_EXPIRE_TIME;
 
-  public JwtTokenPair createJwtToken(Long memberId) {
-    String subject = String.valueOf(memberId);
+  public RefreshTokenDto.Response refreshAccessToken(RefreshTokenDto.Request request) {
+    String realRefreshToken = extractRequestToken(request.refreshToken());
+    Claims verifyToken = verifyToken(realRefreshToken);
+
+    // Subject가 다르면 Deny
+    if (!String.valueOf(request.memberId()).equals(verifyToken.getSubject())) {
+      throw new JwtDeniedException();
+    }
+
+    JwtTokenPair jwtTokenPair = jwtRepository.findById(request.memberId())
+        .map(entity -> {
+          // 저장되어 있는 토큰과 다르면 Deny
+          if (!entity.refreshToken().equals(realRefreshToken)) {
+            throw new JwtDeniedException();
+          }
+          return createJwtTokenPairWithRefreshToken(
+              verifyToken.getSubject(), realRefreshToken
+          );
+        })
+        .orElseGet(() -> createJwtTokenPair(request.memberId()));
+
+    return RefreshTokenDto.Response.builder()
+        .grantType(BEARER_TOKEN_STRING)
+        .accessToken(jwtTokenPair.accessToken())
+        .refreshToken(jwtTokenPair.refreshToken())
+        .build();
+  }
+
+  public JwtTokenPair createJwtTokenPair(Long memberId) {
+    return createJwtTokenPair(String.valueOf(memberId));
+  }
+
+  public JwtTokenPair createJwtTokenPair(String subject) {
+    String refreshToken = createRefreshToken(subject, System.currentTimeMillis());
+    return createJwtTokenPairWithRefreshToken(subject, refreshToken);
+  }
+
+  public JwtTokenPair createJwtTokenPairWithRefreshToken(String subject, String refreshToken) {
     return JwtTokenPair.builder()
         .accessToken(createAccessToken(subject, System.currentTimeMillis()))
-        .refreshToken(createRefreshToken(subject, System.currentTimeMillis()))
+        .refreshToken(refreshToken)
         .build();
   }
 
   public String createAccessToken(String subject, long currentTime) {
-    return BEARER_TOKEN_PREFIX + createToken(subject, currentTime, ACCESS_EXPIRE_TIME);
+    return createToken(subject, currentTime, ACCESS_EXPIRE_TIME);
   }
 
   public String createRefreshToken(String subject, long currentTime) {
@@ -53,19 +90,7 @@ public class JwtService {
             .refreshToken(refreshToken)
             .build()
     );
-    return BEARER_TOKEN_PREFIX + refreshToken;
-  }
-
-  public RefreshTokenDto.Response refreshAccessToken(RefreshTokenDto.Request request) {
-    Claims verifyToken = verifyToken(extractRequestToken(request.refreshToken()));
-    if (jwtRepository.findById(request.memberId()).isEmpty()) {
-      throw new JwtDeniedException();
-    }
-
-    return RefreshTokenDto.Response.builder()
-        .accessToken(createAccessToken(verifyToken.getSubject(), request.currentTime()))
-        .refreshToken(request.refreshToken())
-        .build();
+    return refreshToken;
   }
 
   public String createToken(String subject, long currentTime, long expiredTime) {
