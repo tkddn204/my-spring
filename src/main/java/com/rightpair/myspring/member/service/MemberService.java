@@ -4,16 +4,15 @@ import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
+import com.rightpair.myspring.member.exception.ExistedEmailException;
+import com.rightpair.myspring.member.exception.InvalidPasswordException;
+import com.rightpair.myspring.member.exception.MemberNotFoundException;
 import com.rightpair.myspring.member.repository.MemberRepository;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +22,15 @@ public class MemberService {
 
   public GetMemberDto.Response getMemberById(Long id) {
     Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
+        .orElseThrow(MemberNotFoundException::new);
 
-    return Optional.ofNullable(member)
-        .map(GetMemberDto.Response::fromEntity)
-        .orElseThrow(() -> new RuntimeException("getMemberById Response DTO 변환에 실패했습니다."));
+    return GetMemberDto.Response.fromEntity(member);
   }
 
   @Transactional
   public JoinMemberDto.Response joinMember(JoinMemberDto.Request request) {
     if (memberRepository.existsByEmail(request.email())) {
-      throw new EntityExistsException("이미 존재하는 이메일입니다.");
+      throw new ExistedEmailException();
     }
 
     Member member = memberRepository.save(
@@ -44,25 +41,21 @@ public class MemberService {
             .build()
     );
 
-    return Optional.of(member)
-        .map(JoinMemberDto.Response::fromEntity)
-        .orElseThrow(() -> new RuntimeException("joinMember Response DTO 변환에 실패했습니다."));
+    return JoinMemberDto.Response.fromEntity(member);
   }
 
   public LoginMemberDto.Response loginMember(LoginMemberDto.Request request) {
     Member member = memberRepository.findByEmail(request.email())
-        .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
+        .orElseThrow(MemberNotFoundException::new);
 
     validatePassword(request.password(), member.getPassword());
 
-    return Optional.of(member)
-        .map(LoginMemberDto.Response::fromEntity)
-        .orElseThrow(() -> new RuntimeException("loginMEmber Response DTO 변환에 실패했습니다."));
+    return LoginMemberDto.Response.fromEntity(member);
   }
 
   private void validatePassword(String input, String saved) {
     if (!passwordEncoder.matches(input, saved)) {
-      throw new IllegalArgumentException("올바른 패스워드가 아닙니다.");
+      throw new InvalidPasswordException();
     }
   }
 
