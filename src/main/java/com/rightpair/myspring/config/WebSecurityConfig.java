@@ -32,12 +32,7 @@ public class WebSecurityConfig {
     http.authorizeHttpRequests(
         request -> request.requestMatchers(
 //                AntPathRequestMatcher.antMatcher("/**"),
-            AntPathRequestMatcher.antMatcher("/api/member/**")
-        ).permitAll().anyRequest().anonymous()
-    );
-
-    http.authorizeHttpRequests(
-        request -> request.requestMatchers(
+            AntPathRequestMatcher.antMatcher("/api/member/**"),
             AntPathRequestMatcher.antMatcher("/api/auth/refresh")
         ).permitAll().anyRequest().authenticated()
     );
