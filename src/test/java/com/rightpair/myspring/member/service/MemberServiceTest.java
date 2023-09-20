@@ -1,5 +1,7 @@
 package com.rightpair.myspring.member.service;
 
+import com.rightpair.myspring.jwt.dto.JwtTokenPair;
+import com.rightpair.myspring.jwt.service.JwtService;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
@@ -31,6 +33,9 @@ class MemberServiceTest extends TestSettings {
 
   @InjectMocks
   private MemberService memberService;
+
+  @Mock
+  private JwtService jwtService;
 
   @Mock
   private MemberRepository memberRepository;
@@ -96,8 +101,12 @@ class MemberServiceTest extends TestSettings {
           .password(member.getPassword())
           .build();
       member.setPassword(passwordEncoder.encode(member.getPassword()));
+      JwtTokenPair jwtTokenPair = JwtTokenPair.builder()
+          .accessToken("fake-access-token")
+          .refreshToken("fake-refresh-token")
+          .build();
       given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(member));
-
+      given(jwtService.createJwtTokenPair(member.getId())).willReturn(jwtTokenPair);
       // When
       LoginMemberDto.Response response = memberService.loginMember(request);
 

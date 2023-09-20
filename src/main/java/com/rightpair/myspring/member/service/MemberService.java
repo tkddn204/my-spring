@@ -1,5 +1,6 @@
 package com.rightpair.myspring.member.service;
 
+import com.rightpair.myspring.jwt.service.JwtService;
 import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
   private final MemberRepository memberRepository;
+  private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   public GetMemberDto.Response getMemberById(Long id) {
@@ -29,9 +31,7 @@ public class MemberService {
 
   @Transactional
   public JoinMemberDto.Response joinMember(JoinMemberDto.Request request) {
-    if (memberRepository.existsByEmail(request.email())) {
-      throw new ExistedEmailException();
-    }
+    validateExistedEmail(request);
 
     Member member = memberRepository.save(
         Member.builder()
@@ -44,13 +44,21 @@ public class MemberService {
     return JoinMemberDto.Response.fromEntity(member);
   }
 
+  private void validateExistedEmail(JoinMemberDto.Request request) {
+    if (memberRepository.existsByEmail(request.email())) {
+      throw new ExistedEmailException();
+    }
+  }
+
   public LoginMemberDto.Response loginMember(LoginMemberDto.Request request) {
     Member member = memberRepository.findByEmail(request.email())
         .orElseThrow(MemberNotFoundException::new);
 
     validatePassword(request.password(), member.getPassword());
 
-    return LoginMemberDto.Response.fromEntity(member);
+    return LoginMemberDto.Response.fromEntityAndPair(
+        member, jwtService.createJwtTokenPair(member.getId())
+    );
   }
 
   private void validatePassword(String input, String saved) {

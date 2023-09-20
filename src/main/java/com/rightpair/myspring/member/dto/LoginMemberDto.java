@@ -1,5 +1,6 @@
 package com.rightpair.myspring.member.dto;
 
+import com.rightpair.myspring.jwt.dto.JwtTokenPair;
 import com.rightpair.myspring.member.entity.Member;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,13 +26,15 @@ public class LoginMemberDto {
   public record Response(
       Long id,
       String email,
-      String nickname
+      String nickname,
+      JwtTokenPair jwtTokenPair
   ) {
-    public static Response fromEntity(Member member) {
+    public static Response fromEntityAndPair(Member member, JwtTokenPair jwtTokenPair) {
       return Response.builder()
           .id(member.getId())
           .email(member.getEmail())
           .nickname(member.getNickname())
+          .jwtTokenPair(jwtTokenPair)
           .build();
     }
   }

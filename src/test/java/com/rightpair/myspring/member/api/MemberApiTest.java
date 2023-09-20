@@ -3,6 +3,7 @@ package com.rightpair.myspring.member.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rightpair.myspring.jwt.service.JwtService;
 import com.rightpair.myspring.member.dto.GetMemberDto;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
@@ -10,6 +11,7 @@ import com.rightpair.myspring.member.entity.Member;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.utils.MemberTestFactory;
 import com.rightpair.myspring.utils.TestSettings;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,6 +37,9 @@ class MemberApiTest extends TestSettings {
 
   @Autowired
   private MemberRepository memberRepository;
+
+  @Autowired
+  private JwtService jwtService;
 
   @Nested
   @DisplayName("유저가 회원가입을 할 때")
@@ -86,7 +91,7 @@ class MemberApiTest extends TestSettings {
           )
           // Then
           .andExpect(status().isBadRequest())
-          .andExpect(status().reason(containsString("Invalid request content.")));
+          .andExpect(jsonPath("$.message").value("올바른 이메일 형식이 아닙니다."));
     }
   }
 
@@ -106,8 +111,10 @@ class MemberApiTest extends TestSettings {
           .email(member.getEmail())
           .password(member.getPassword())
           .build();
-      LoginMemberDto.Response expectedResponse = LoginMemberDto.Response.fromEntity(savedMember);
-      String expected = objectMapper.writeValueAsString(expectedResponse);
+      LoginMemberDto.Response expectedResponse = LoginMemberDto.Response.fromEntityAndPair(
+          savedMember, jwtService.createJwtTokenPair(savedMember.getId())
+      );
+      Matcher<String> jwtPatternMatcher = matchesPattern("^[\\w-]*\\.[\\w-]*\\.[\\w-]*$");
 
       // When
       mockMvc.perform(post("/api/member/login")
@@ -116,7 +123,11 @@ class MemberApiTest extends TestSettings {
           )
           // Then
           .andExpect(status().isOk())
-          .andExpect(content().json(expected));
+          .andExpect(jsonPath("$.id").value(expectedResponse.id()))
+          .andExpect(jsonPath("$.email").value(expectedResponse.email()))
+          .andExpect(jsonPath("$.nickname").value(expectedResponse.nickname()))
+          .andExpect(jsonPath("$.jwtTokenPair.accessToken", jwtPatternMatcher))
+          .andExpect(jsonPath("$.jwtTokenPair.refreshToken", jwtPatternMatcher));
     }
 
     @Test
