@@ -13,11 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles(value = "test")
 class JwtServiceTest extends TestSettings {
   private final static String BEARER_TOKEN_PREFIX = "Bearer ";
 

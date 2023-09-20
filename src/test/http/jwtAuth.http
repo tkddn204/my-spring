@@ -1,0 +1,9 @@
+POST http://localhost:8080/api/auth/refresh
+Content-Type: application/json
+Authorization: bearer <access-token>
+
+{
+  "memberId": 1,
+  "grantType": "Bearer",
+  "refreshToken": "<refresh-token>"
+}
