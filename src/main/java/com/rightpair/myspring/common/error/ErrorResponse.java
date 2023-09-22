@@ -1,6 +1,6 @@
 package com.rightpair.myspring.common.error;
 
-public record ExceptionResponse(
+public record ErrorResponse(
     ErrorCode errorCode,
     String message
 ) {
