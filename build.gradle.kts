@@ -27,6 +27,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security:3.1.3")
 	implementation("org.springframework.boot:spring-boot-starter-web:3.1.3")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis:3.1.3")
+	implementation("org.jetbrains:annotations:24.0.0")
 
 	// jwt
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
