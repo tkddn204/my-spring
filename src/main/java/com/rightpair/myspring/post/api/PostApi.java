@@ -2,7 +2,9 @@ package com.rightpair.myspring.post.api;
 
 import com.rightpair.myspring.common.auth.Principal;
 import com.rightpair.myspring.post.dto.CreatePostDto;
+import com.rightpair.myspring.post.dto.DeletePostDto;
 import com.rightpair.myspring.post.dto.GetPostDto;
+import com.rightpair.myspring.post.dto.UpdatePostDto;
 import com.rightpair.myspring.post.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -42,17 +44,33 @@ public record PostApi(PostService postService) {
       @AuthenticationPrincipal Principal principal
   ) {
     return ResponseEntity.status(HttpStatus.CREATED)
+        .contentType(MediaType.APPLICATION_JSON)
         .body(postService.createPost(
             CreatePostDto.Request.from(principal.memberId(), request)
         ));
   }
 
-//  public ResponseEntity<UpdatePostDto.Response> updatePost(UpdatePostDto.Request request) {
-//
-//  }
-//
-//  public ResponseEntity<DeletePostDto.Response> deletePost(DeletePostDto.Request request) {
-//
-//  }
+  @PutMapping
+  public ResponseEntity<UpdatePostDto.Response> updatePost(
+      @Valid @RequestBody UpdatePostDto.ControllerRequest request,
+      @AuthenticationPrincipal Principal principal
+  ) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(postService.updatePost(
+            UpdatePostDto.Request.from(principal.memberId(), request)
+        ));
+  }
 
+  @DeleteMapping
+  public ResponseEntity<DeletePostDto.Response> deletePost(
+      @Valid @RequestBody DeletePostDto.ControllerRequest request,
+      @AuthenticationPrincipal Principal principal
+  ) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(postService.deletePost(
+            DeletePostDto.Request.from(principal.memberId(), request)
+        ));
+  }
 }

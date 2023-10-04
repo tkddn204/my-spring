@@ -19,6 +19,15 @@ public class PostTestFactory {
         .build();
   }
 
+  public static Post createTestPostWithId(Long memberId) {
+    return Post.builder()
+        .id(faker.number().randomNumber())
+        .member(Member.builder().id(memberId).build())
+        .title(faker.lorem().sentence(faker.random().nextInt(3, 7)))
+        .content(faker.lorem().paragraph())
+        .build();
+  }
+
   public static List<Post> createTestPostList() {
     List<Post> postList = new ArrayList<>();
 

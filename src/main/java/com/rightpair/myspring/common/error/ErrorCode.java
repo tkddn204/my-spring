@@ -17,6 +17,7 @@ public enum ErrorCode {
   INVALID_PASSWORD("올바른 패스워드가 아닙니다."),
 
   POST_NOT_FOUND("해당 글을 찾을 수 없습니다."),
+  POST_PERMISSION_DENIED("해당 글에 대한 권한이 없습니다."),
 
   INTERNAL_ERROR("서버 내부에 오류가 발생했습니다.");
 

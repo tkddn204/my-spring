@@ -3,9 +3,12 @@ package com.rightpair.myspring.post.service;
 import com.rightpair.myspring.member.exception.MemberNotFoundException;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.post.dto.CreatePostDto;
+import com.rightpair.myspring.post.dto.DeletePostDto;
 import com.rightpair.myspring.post.dto.GetPostDto;
+import com.rightpair.myspring.post.dto.UpdatePostDto;
 import com.rightpair.myspring.post.entity.Post;
 import com.rightpair.myspring.post.exception.PostNotFoundException;
+import com.rightpair.myspring.post.exception.PostPermissionDeniedException;
 import com.rightpair.myspring.post.repository.PostRepository;
 import com.rightpair.myspring.utils.PostTestFactory;
 import com.rightpair.myspring.utils.TestSettings;
@@ -164,6 +167,110 @@ public class PostServiceTest extends TestSettings {
       // then
       assertThrows(MemberNotFoundException.class,
           () -> postService.createPost(request));
+    }
+  }
+
+  @DisplayName("updatePost() 를 호출할 때")
+  @Nested
+  class UpdatePostTest {
+
+    @DisplayName("올바른 요청으로 Post를 수정할 수 있다.")
+    @Test
+    void shouldSuccessToUpdatePost() {
+      // given
+      Long memberId = 1234L;
+      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post updatedPost = PostTestFactory.createTestPost(memberId);
+      UpdatePostDto.Request request = UpdatePostDto.Request.builder()
+          .postId(post.getId())
+          .memberId(memberId)
+          .title(updatedPost.getTitle())
+          .content(updatedPost.getContent())
+          .build();
+
+      given(memberRepository.existsById(anyLong())).willReturn(true);
+      given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+      // when
+      UpdatePostDto.Response response = postService.updatePost(request);
+
+      // then
+      assertEquals(memberId, response.memberId());
+      assertEquals(updatedPost.getTitle(), response.title());
+      assertEquals(updatedPost.getContent(), response.content());
+    }
+
+    @DisplayName("글의 작성자 ID와 요청의 회원 ID가 다르면 Post를 수정할 수 없다.")
+    @Test
+    void shouldFailToUpdatePost() {
+      // given
+      Long memberId = 1234L;
+      Long wrongMemberId = 9999L;
+
+      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post updatedPost = PostTestFactory.createTestPost(memberId);
+      UpdatePostDto.Request request = UpdatePostDto.Request.builder()
+          .postId(post.getId())
+          .memberId(wrongMemberId)
+          .title(updatedPost.getTitle())
+          .content(updatedPost.getContent())
+          .build();
+
+      given(memberRepository.existsById(wrongMemberId)).willReturn(true);
+      given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+      // when
+      // then
+      assertThrows(PostPermissionDeniedException.class,
+          () -> postService.updatePost(request));
+    }
+  }
+
+  @DisplayName("deletePost() 를 호출할 때")
+  @Nested
+  class DeletePostTest {
+
+    @DisplayName("올바른 요청으로 Post를 삭제할 수 있다.")
+    @Test
+    void shouldSuccessToDeletePost() {
+      // given
+      Long memberId = 1234L;
+      Post post = PostTestFactory.createTestPostWithId(memberId);
+      DeletePostDto.Request request = DeletePostDto.Request.builder()
+          .postId(post.getId())
+          .memberId(memberId)
+          .build();
+
+      given(memberRepository.existsById(anyLong())).willReturn(true);
+      given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+      // when
+      DeletePostDto.Response response = postService.deletePost(request);
+
+      // then
+      assertEquals(post.getId(), response.postId());
+    }
+
+    @DisplayName("글의 작성자 ID와 요청의 회원 ID가 다르면 Post를 삭제할 수 없다.")
+    @Test
+    void shouldFailToDeletePost() {
+      // given
+      Long memberId = 1234L;
+      Long wrongMemberId = 9999L;
+
+      Post post = PostTestFactory.createTestPostWithId(memberId);
+      DeletePostDto.Request request = DeletePostDto.Request.builder()
+          .postId(post.getId())
+          .memberId(wrongMemberId)
+          .build();
+
+      given(memberRepository.existsById(wrongMemberId)).willReturn(true);
+      given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+      // when
+      // then
+      assertThrows(PostPermissionDeniedException.class,
+          () -> postService.deletePost(request));
     }
   }
 }

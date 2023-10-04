@@ -24,7 +24,7 @@ public record MemberApi(MemberService memberService) {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<LoginMemberDto.Response> joinMember(
+  public ResponseEntity<LoginMemberDto.Response> loginMember(
       @Valid @RequestBody LoginMemberDto.Request request
   ) {
     return ResponseEntity.status(HttpStatus.OK)
