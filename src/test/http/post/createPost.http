@@ -1,0 +1,9 @@
+// 포스트 작성 - 로그인을 먼저 해야 글이 작성됩니다
+POST http://localhost:8080/api/post
+Content-Type: application/json
+Authorization: bearer <access-token>
+
+{
+  "title": "타이틀",
+  "content": "내용은 10자 이상 입력해야됩니다람쥐"
+}
