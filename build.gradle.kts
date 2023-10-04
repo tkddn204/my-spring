@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.1.3"
 	id("io.spring.dependency-management") version "1.1.3"
+	id("org.asciidoctor.jvm.convert") version "3.3.2"
 }
 
 group = "com.rightpair"
@@ -39,8 +40,38 @@ dependencies {
 	runtimeOnly("com.mysql:mysql-connector-j:8.0.32")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:3.1.3")
 	annotationProcessor("org.projectlombok:lombok:1.18.26")
+
+	// test
 	testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.3")
 	testImplementation("com.github.javafaker:javafaker:1.0.2")
+	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc:3.0.4")
+}
+
+val asciidoctorExt: Configuration by configurations.creating
+dependencies {
+	asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.4")
+}
+tasks {
+	val snippetsDir by extra { file("out/generated-snippets") }
+	test {
+		outputs.dir(snippetsDir)
+	}
+
+	asciidoctor {
+		inputs.dir(snippetsDir)
+		configurations(asciidoctorExt.name)
+		dependsOn(test)
+		doLast {
+			copy {
+				from("out/docs/asciidoc")
+				into("src/main/resources/static/docs")
+			}
+		}
+	}
+
+	build {
+		dependsOn(asciidoctor)
+	}
 }
 
 tasks.withType<Test> {
