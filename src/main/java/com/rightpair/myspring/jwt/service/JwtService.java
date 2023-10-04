@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
 import java.util.Date;
@@ -81,6 +82,7 @@ public class JwtService {
     return createToken(subject, currentTime, ACCESS_EXPIRE_TIME);
   }
 
+  @Transactional
   public String createRefreshToken(String subject, long currentTime) {
     String refreshToken = createToken(subject, currentTime, REFRESH_EXPIRE_TIME);
     jwtRepository.save(
