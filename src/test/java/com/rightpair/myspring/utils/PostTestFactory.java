@@ -15,7 +15,7 @@ public class PostTestFactory {
     return Post.builder()
         .member(Member.builder().id(memberId).build())
         .title(faker.lorem().sentence(faker.random().nextInt(3, 7)))
-        .content(faker.lorem().paragraph())
+        .content(faker.lorem().paragraph(2))
         .build();
   }
 
