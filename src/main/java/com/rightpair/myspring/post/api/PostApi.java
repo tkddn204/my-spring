@@ -63,15 +63,15 @@ public record PostApi(PostService postService) {
         ));
   }
 
-  @DeleteMapping
+  @DeleteMapping("/{post_id}")
   public ResponseEntity<DeletePostDto.Response> deletePost(
-      @Valid @RequestBody DeletePostDto.ControllerRequest request,
+      @PathVariable("post_id") Long postId,
       @AuthenticationPrincipal Principal principal
   ) {
     return ResponseEntity.status(HttpStatus.OK)
         .contentType(MediaType.APPLICATION_JSON)
         .body(postService.deletePost(
-            DeletePostDto.Request.from(principal.memberId(), request)
+            DeletePostDto.Request.from(principal.memberId(), postId)
         ));
   }
 }

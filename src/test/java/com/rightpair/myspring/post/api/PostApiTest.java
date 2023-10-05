@@ -9,6 +9,7 @@ import com.rightpair.myspring.member.entity.Member;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.member.service.MemberService;
 import com.rightpair.myspring.post.dto.CreatePostDto;
+import com.rightpair.myspring.post.dto.DeletePostDto;
 import com.rightpair.myspring.post.dto.UpdatePostDto;
 import com.rightpair.myspring.post.entity.Post;
 import com.rightpair.myspring.post.repository.PostRepository;
@@ -152,7 +153,20 @@ class PostApiTest extends TestSettings {
     }
 
     @Test
-    @DisplayName("조회에 성공한다")
+    @DisplayName("포스트 리스트의 조회에 성공한다")
+    public void shouldSuccessToGetPostList() throws Exception {
+      // Given
+      // When
+      mockMvc.perform(get("/api/post")
+              .contentType(MediaType.APPLICATION_JSON)
+          )
+          // Then
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("포스트 1개의 조회에 성공한다")
     public void shouldSuccessToGetPost() throws Exception {
       // Given
       long postId = postList.get(0).getId();
@@ -215,8 +229,7 @@ class PostApiTest extends TestSettings {
       testJwtTokenPair = response.jwtTokenPair();
 
       // 테스트용 postList 저장
-      testPostList.forEach(post -> post.setMember(testMember));
-      testPostList = postRepository.saveAll(testPostList);
+      testPostList = postRepository.saveAll(testPostList.stream().peek(post -> post.setMember(testMember)).toList());
     }
 
     @Test
@@ -275,5 +288,92 @@ class PostApiTest extends TestSettings {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errorCode").value("BINDING_ERROR"));
     }
+  }
+
+  @Nested
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  @DisplayName("유저가 포스트를 삭제할 때")
+  class DeletePostTest {
+
+    private List<Post> testPostList = PostTestFactory.createTestPostList(1);
+    private Member testMember;
+    private JwtTokenPair testJwtTokenPair;
+
+    @BeforeAll
+    public void beforeAll() {
+
+      // 테스트 멤버 생성
+      testMember = MemberTestFactory.createUnEncodedTestMember();
+      JoinMemberDto.Request joinRequest = JoinMemberDto.Request.builder()
+          .email(testMember.getEmail())
+          .password(testMember.getPassword())
+          .nickname(testMember.getNickname())
+          .build();
+      JoinMemberDto.Response joinResponse = memberService.joinMember(joinRequest);
+      testMember.setId(joinResponse.id());
+
+      // 테스트 멤버로 로그인
+      LoginMemberDto.Request loginRequest = LoginMemberDto.Request.builder()
+          .email(testMember.getEmail())
+          .password(testMember.getPassword())
+          .build();
+      LoginMemberDto.Response response = memberService.loginMember(loginRequest);
+      testJwtTokenPair = response.jwtTokenPair();
+
+      // 테스트용 postList 저장
+      testPostList = postRepository.saveAll(testPostList.stream().peek(post -> post.setMember(testMember)).toList());
+    }
+
+    @Test
+    @DisplayName("요청을 보내면 포스트 삭제에 성공한다")
+    public void shouldSuccessToDeletePostTestWithValidData() throws Exception {
+      // Given
+      long originPostId = testPostList.get(0).getId();
+      DeletePostDto.Response expectedResponse = DeletePostDto.Response.builder()
+          .postId(originPostId)
+          .build();
+
+      // When
+      String jsonResponse = mockMvc.perform(delete("/api/post/" + originPostId)
+              .header("Authorization", "bearer " + testJwtTokenPair.accessToken())
+          ).andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+      JsonNode actualJson = objectMapper.readTree(jsonResponse);
+
+      // Then
+      assertTrue(actualJson.hasNonNull("postId"));
+      assertEquals(expectedResponse.postId(), actualJson.get("postId").asLong());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 포스트 Id로 요청할 경우 삭제에 실패한다")
+    public void shouldFailToDeletePostTestWithInValidData() throws Exception {
+      // Given
+      long notExistedPostId = 1234567L;
+
+      // When
+      mockMvc.perform(delete("/api/post/" + notExistedPostId)
+              .header("Authorization", "bearer " + testJwtTokenPair.accessToken())
+          )
+          // Then
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errorCode").value("POST_NOT_FOUND"));
+    }
+
+//    // TODO: 권한 관련 ArgumentResolver 생성 후 테스트 필요
+//    @Test
+//    @DisplayName("권한 없이 요청할 경우 삭제에 실패한다")
+//    public void shouldFailToDeletePostTestWithNullAuth() throws Exception {
+//      // Given
+//      long originPostId = testPostList.get(0).getId();
+//
+//      // When
+//      mockMvc.perform(delete("/api/post/" + originPostId))
+//          // Then
+//          .andExpect(status().isBadRequest())
+////          .andExpect(jsonPath("$.errorCode").value("BINDING_ERROR"));
+//    }
   }
 }
