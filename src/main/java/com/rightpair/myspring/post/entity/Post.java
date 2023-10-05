@@ -4,6 +4,7 @@ import com.rightpair.myspring.common.BaseEntity;
 import com.rightpair.myspring.member.entity.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Data
@@ -19,8 +20,9 @@ public class Post extends BaseEntity {
   @Column(name = "post_id", updatable = false)
   private Long id;
 
+  @NotNull
   @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  @JoinColumn(name = "member_id", updatable = false)
   private Member member;
 
   @NotBlank
