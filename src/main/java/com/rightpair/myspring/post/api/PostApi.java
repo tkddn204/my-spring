@@ -50,27 +50,28 @@ public record PostApi(PostService postService) {
         ));
   }
 
-  @PutMapping
+  @PutMapping("/{post_id}")
   public ResponseEntity<UpdatePostDto.Response> updatePost(
+      @PathVariable("post_id") Long postId,
       @Valid @RequestBody UpdatePostDto.ControllerRequest request,
       @AuthenticationPrincipal Principal principal
   ) {
     return ResponseEntity.status(HttpStatus.OK)
         .contentType(MediaType.APPLICATION_JSON)
         .body(postService.updatePost(
-            UpdatePostDto.Request.from(principal.memberId(), request)
+            UpdatePostDto.Request.from(postId, principal.memberId(), request)
         ));
   }
 
-  @DeleteMapping
+  @DeleteMapping("/{post_id}")
   public ResponseEntity<DeletePostDto.Response> deletePost(
-      @Valid @RequestBody DeletePostDto.ControllerRequest request,
+      @PathVariable("post_id") Long postId,
       @AuthenticationPrincipal Principal principal
   ) {
     return ResponseEntity.status(HttpStatus.OK)
         .contentType(MediaType.APPLICATION_JSON)
         .body(postService.deletePost(
-            DeletePostDto.Request.from(principal.memberId(), request)
+            DeletePostDto.Request.from(principal.memberId(), postId)
         ));
   }
 }

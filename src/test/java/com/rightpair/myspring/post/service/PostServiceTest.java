@@ -179,7 +179,7 @@ public class PostServiceTest extends TestSettings {
     void shouldSuccessToUpdatePost() {
       // given
       Long memberId = 1234L;
-      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post post = PostTestFactory.createTestPostWithPostId(memberId);
       Post updatedPost = PostTestFactory.createTestPost(memberId);
       UpdatePostDto.Request request = UpdatePostDto.Request.builder()
           .postId(post.getId())
@@ -207,7 +207,7 @@ public class PostServiceTest extends TestSettings {
       Long memberId = 1234L;
       Long wrongMemberId = 9999L;
 
-      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post post = PostTestFactory.createTestPostWithPostId(memberId);
       Post updatedPost = PostTestFactory.createTestPost(memberId);
       UpdatePostDto.Request request = UpdatePostDto.Request.builder()
           .postId(post.getId())
@@ -235,7 +235,7 @@ public class PostServiceTest extends TestSettings {
     void shouldSuccessToDeletePost() {
       // given
       Long memberId = 1234L;
-      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post post = PostTestFactory.createTestPostWithPostId(memberId);
       DeletePostDto.Request request = DeletePostDto.Request.builder()
           .postId(post.getId())
           .memberId(memberId)
@@ -258,7 +258,7 @@ public class PostServiceTest extends TestSettings {
       Long memberId = 1234L;
       Long wrongMemberId = 9999L;
 
-      Post post = PostTestFactory.createTestPostWithId(memberId);
+      Post post = PostTestFactory.createTestPostWithPostId(memberId);
       DeletePostDto.Request request = DeletePostDto.Request.builder()
           .postId(post.getId())
           .memberId(wrongMemberId)
