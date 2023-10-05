@@ -28,9 +28,10 @@ public class UpdatePostDto {
           String content
       ) {
 
-    public static Request from(Long memberId, ControllerRequest controllerRequest) {
+    public static Request from(Long postId, Long memberId, ControllerRequest controllerRequest) {
       return Request.builder()
           .memberId(memberId)
+          .postId(postId)
           .title(controllerRequest.title())
           .content(controllerRequest.content())
           .build();

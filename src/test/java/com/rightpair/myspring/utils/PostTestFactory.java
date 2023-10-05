@@ -19,7 +19,7 @@ public class PostTestFactory {
         .build();
   }
 
-  public static Post createTestPostWithId(Long memberId) {
+  public static Post createTestPostWithPostId(Long memberId) {
     return Post.builder()
         .id(faker.number().randomNumber())
         .member(Member.builder().id(memberId).build())
@@ -28,18 +28,30 @@ public class PostTestFactory {
         .build();
   }
 
-  public static List<Post> createTestPostList() {
+  public static List<Post> createTestPostList(int size) {
     List<Post> postList = new ArrayList<>();
 
     // 랜덤한 5개 ID 고름
     List<Long> memberList = MemberTestFactory.createTestMemberIdList();
 
     // 비둘기집 원리에 의해 Post 중 적어도 1개는 여러 개의 ID를 가질 것임
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < size; i++)
       postList.add(createTestPost(
           memberList.get(faker.random().nextInt(0, memberList.size() - 1))
       ));
 
+    return postList;
+  }
+
+  public static List<Post> createTestPostList() {
+    return createTestPostList(10);
+  }
+
+  public static List<Post> createFailTestPostList() {
+    List<Post> postList = createTestPostList(3);
+    postList.get(0).setTitle(null);
+    postList.get(1).setContent(null);
+    postList.get(2).setContent("test");
     return postList;
   }
 }
