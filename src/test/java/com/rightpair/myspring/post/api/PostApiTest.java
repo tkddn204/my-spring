@@ -9,6 +9,7 @@ import com.rightpair.myspring.member.entity.Member;
 import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.member.service.MemberService;
 import com.rightpair.myspring.post.dto.CreatePostDto;
+import com.rightpair.myspring.post.dto.UpdatePostDto;
 import com.rightpair.myspring.post.entity.Post;
 import com.rightpair.myspring.post.repository.PostRepository;
 import com.rightpair.myspring.utils.MemberTestFactory;
@@ -26,8 +27,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,8 +92,6 @@ class PostApiTest extends TestSettings {
           .content(post.getContent())
           .build();
       CreatePostDto.Response expectedResponse = CreatePostDto.Response.fromEntity(post);
-      String expectedString = objectMapper.writeValueAsString(expectedResponse);
-      JsonNode expectedJson = objectMapper.readTree(expectedString);
 
       // When
       String jsonResponse = mockMvc.perform(post("/api/post")
@@ -108,8 +106,8 @@ class PostApiTest extends TestSettings {
 
       // Then
       assertTrue(actualJson.hasNonNull("postId"));
-      assertEquals(expectedJson.get("title"), actualJson.get("title"));
-      assertEquals(expectedJson.get("content"), actualJson.get("content"));
+      assertEquals(expectedResponse.title(), actualJson.get("title").asText());
+      assertEquals(expectedResponse.content(), actualJson.get("content").asText());
     }
 
     // 0 : 제목이 비어 있을 경우
@@ -144,20 +142,20 @@ class PostApiTest extends TestSettings {
   @DisplayName("포스트를 조회할 때")
   class GetPostTest {
 
-    private final List<Post> postList = PostTestFactory.createTestPostList();
+    private List<Post> postList = PostTestFactory.createTestPostList();
 
     @BeforeAll
     public void beforeAll() {
       // 포스트 생성
       Member savedTestMember = memberRepository.save(MemberTestFactory.createTestMember());
-      postRepository.saveAll(postList.stream().peek(post -> post.setMember(savedTestMember)).toList());
+      postList = postRepository.saveAll(postList.stream().peek(post -> post.setMember(savedTestMember)).toList());
     }
 
     @Test
     @DisplayName("조회에 성공한다")
     public void shouldSuccessToGetPost() throws Exception {
       // Given
-      long postId = 1L;
+      long postId = postList.get(0).getId();
       Post expectedPost = postList.get(0);
 
       // When
@@ -182,6 +180,100 @@ class PostApiTest extends TestSettings {
           // Then
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errorCode").value("POST_NOT_FOUND"));
+    }
+  }
+
+  @Nested
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  @DisplayName("유저가 포스트를 수정할 때")
+  class UpdatePostTest {
+
+    private final List<Post> failTestPostList = PostTestFactory.createFailTestPostList();
+    private List<Post> testPostList = PostTestFactory.createTestPostList(3);
+    private Member testMember;
+    private JwtTokenPair testJwtTokenPair;
+
+    @BeforeAll
+    public void beforeAll() {
+
+      // 테스트 멤버 생성
+      testMember = MemberTestFactory.createUnEncodedTestMember();
+      JoinMemberDto.Request joinRequest = JoinMemberDto.Request.builder()
+          .email(testMember.getEmail())
+          .password(testMember.getPassword())
+          .nickname(testMember.getNickname())
+          .build();
+      JoinMemberDto.Response joinResponse = memberService.joinMember(joinRequest);
+      testMember.setId(joinResponse.id());
+
+      // 테스트 멤버로 로그인
+      LoginMemberDto.Request loginRequest = LoginMemberDto.Request.builder()
+          .email(testMember.getEmail())
+          .password(testMember.getPassword())
+          .build();
+      LoginMemberDto.Response response = memberService.loginMember(loginRequest);
+      testJwtTokenPair = response.jwtTokenPair();
+
+      // 테스트용 postList 저장
+      testPostList.forEach(post -> post.setMember(testMember));
+      testPostList = postRepository.saveAll(testPostList);
+    }
+
+    @Test
+    @DisplayName("양식에 맞게 요청을 제출하면 포스트 수정에 성공한다")
+    public void shouldSuccessToUpdatePostTestWithValidData() throws Exception {
+      // Given
+      long originPostId = testPostList.get(0).getId();
+      // 포스트 수정 요청 생성
+      Post updatedPost = PostTestFactory.createTestPost(testMember.getId());
+      UpdatePostDto.ControllerRequest controllerRequest = UpdatePostDto.ControllerRequest.builder()
+          .title(updatedPost.getTitle())
+          .content(updatedPost.getContent())
+          .build();
+      UpdatePostDto.Response expectedResponse = UpdatePostDto.Response.fromEntity(updatedPost);
+
+      // When
+      String jsonResponse = mockMvc.perform(put("/api/post/" + originPostId)
+              .header("Authorization", "bearer " + testJwtTokenPair.accessToken())
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsBytes(controllerRequest))
+          ).andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+      JsonNode actualJson = objectMapper.readTree(jsonResponse);
+
+      // Then
+      assertTrue(actualJson.hasNonNull("postId"));
+      assertEquals(expectedResponse.title(), actualJson.get("title").asText());
+      assertEquals(expectedResponse.content(), actualJson.get("content").asText());
+    }
+
+    // 0 : 제목이 비어 있을 경우
+    // 1 : 내용이 비어 있을 경우
+    // 2 : 내용이 10자 이하일 경우
+    @ValueSource(ints = {0, 1, 2})
+    @ParameterizedTest
+    @DisplayName("양식에 맞지 않게 요청을 제출하면 포스트 수정에 실패한다")
+    public void shouldFailToUpdatePostTestWithInValidData(int postIndex) throws Exception {
+      // Given
+      long originPostId = testPostList.get(0).getId();
+      // 포스트 수정 요청 생성
+      Post post = failTestPostList.get(postIndex);
+      UpdatePostDto.ControllerRequest controllerRequest = UpdatePostDto.ControllerRequest.builder()
+          .title(post.getTitle())
+          .content(post.getContent())
+          .build();
+
+      // When
+      mockMvc.perform(put("/api/post/" + originPostId)
+              .header("Authorization", "bearer " + testJwtTokenPair.accessToken())
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsBytes(controllerRequest))
+          )
+          // Then
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errorCode").value("BINDING_ERROR"));
     }
   }
 }
