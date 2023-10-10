@@ -44,7 +44,7 @@ dependencies {
 	// test
 	testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.3")
 	testImplementation("com.github.javafaker:javafaker:1.0.2")
-	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc:3.0.4")
+	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 val asciidoctorExt: Configuration by configurations.creating
@@ -52,28 +52,23 @@ dependencies {
 	asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.4")
 }
 tasks {
-	val snippetsDir by extra { file("out/generated-snippets") }
+	val snippetsDir by extra { file("build/generated-snippets") }
 	test {
 		outputs.dir(snippetsDir)
+		useJUnitPlatform()
 	}
 
 	asciidoctor {
 		inputs.dir(snippetsDir)
 		configurations(asciidoctorExt.name)
 		dependsOn(test)
-		doLast {
-			copy {
-				from("out/docs/asciidoc")
-				into("src/main/resources/static/docs")
-			}
+		sources {
+			include("**/index.adoc")
 		}
+		baseDirFollowsSourceFile()
 	}
 
 	build {
 		dependsOn(asciidoctor)
 	}
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
 }

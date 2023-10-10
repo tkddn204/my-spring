@@ -1,0 +1,12 @@
+[[member-join]]
+=== 유저 회원가입
+
+==== HTTP 요청
+
+include::{snippets}/member-join/http-request.adoc
+include::{snippets}/member-join/request-fields.adoc
+
+==== HTTP 응답
+
+include::{snippets}/member-join/http-response.adoc
+include::{snippets}/member-join/response-fields.adoc

@@ -1,0 +1,12 @@
+= 🌱 My Spring Api 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[Member-API]]
+== Member API
+
+include::member/member.adoc[]
