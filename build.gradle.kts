@@ -49,7 +49,7 @@ dependencies {
 
 val asciidoctorExt: Configuration by configurations.creating
 dependencies {
-	asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.4")
+	asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
 }
 tasks {
 	val snippetsDir by extra { file("build/generated-snippets") }
@@ -59,11 +59,14 @@ tasks {
 	}
 
 	asciidoctor {
+		dependsOn(test)
+
 		inputs.dir(snippetsDir)
 		configurations(asciidoctorExt.name)
-		dependsOn(test)
-		sources {
-			include("**/index.adoc")
+
+		copy {
+			from("build/docs/asciidoc")
+			into("docs/")
 		}
 		baseDirFollowsSourceFile()
 	}
