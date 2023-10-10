@@ -1,6 +1,9 @@
 package com.rightpair.myspring.post.repository;
 
+import com.rightpair.myspring.member.entity.Member;
+import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.post.entity.Post;
+import com.rightpair.myspring.utils.MemberTestFactory;
 import com.rightpair.myspring.utils.PostTestFactory;
 import com.rightpair.myspring.utils.TestSettings;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,14 +23,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PostRepositoryTest extends TestSettings {
 
   @Autowired
+  private MemberRepository memberRepository;
+
+  @Autowired
   private PostRepository postRepository;
 
   private List<Post> postList;
 
   @BeforeAll
   public void beforeAll() {
+    Member member = MemberTestFactory.createTestMember();
+    Member savedMember = memberRepository.save(member);
     postList = PostTestFactory.createTestPostList();
-    postRepository.saveAll(postList);
+    postRepository.saveAll(postList.stream()
+            .peek(post -> post.setMember(savedMember)).toList());
   }
 
   @DisplayName("페이지를 설정해서 PostList를 가져올 수 있다.")
