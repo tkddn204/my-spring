@@ -1,6 +1,6 @@
 # My Spring 🌱
 
-**Spring Boot**를 배우면서 개발한 토이프로젝트입니다.
+**Spring Boot**를 배우면서 개발한 **Spring REST API 서버** 토이프로젝트입니다.
 
 ## 개발 환경
 
