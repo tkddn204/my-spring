@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 class JwtApiTest extends TestSettings {
+  private final static String BEARER_TOKEN_PREFIX = "Bearer ";
 
   @Autowired
   private MockMvc mockMvc;
@@ -41,13 +42,13 @@ class JwtApiTest extends TestSettings {
       JwtTokenPair jwtTokenPair = jwtService.createJwtTokenPair(memberId);
       RefreshTokenDto.RefreshRequest request = RefreshTokenDto.RefreshRequest.builder()
           .grantType("Bearer")
-          .memberId(memberId)
           .refreshToken(jwtTokenPair.refreshToken())
           .build();
 
       // when
       mockMvc.perform(post("/api/auth/refresh")
               .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", BEARER_TOKEN_PREFIX + jwtTokenPair.accessToken())
               .content(objectMapper.writeValueAsBytes(request)))
           // then
           .andExpect(status().isCreated())
@@ -59,16 +60,16 @@ class JwtApiTest extends TestSettings {
     void shouldFailRefreshAccessTokenWithInvalidString() throws Exception {
       // given
       Long memberId = 1234L;
-      jwtService.createJwtTokenPair(memberId);
+      JwtTokenPair jwtTokenPair = jwtService.createJwtTokenPair(memberId);
       RefreshTokenDto.RefreshRequest request = RefreshTokenDto.RefreshRequest.builder()
           .grantType("Bearer")
-          .memberId(memberId)
           .refreshToken("wrong-refresh-token")
           .build();
 
       // when
       mockMvc.perform(post("/api/auth/refresh")
               .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", BEARER_TOKEN_PREFIX + jwtTokenPair.accessToken())
               .content(objectMapper.writeValueAsBytes(request)))
           // then
           .andExpect(status().isBadRequest());

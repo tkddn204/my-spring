@@ -7,7 +7,6 @@ public class RefreshTokenDto {
 
   @Builder
   public record RefreshRequest(
-      Long memberId,
       @Pattern(regexp = "Bearer")
       String grantType,
       @Pattern(regexp = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$", message = "올바른 JWT 포맷이 아닙니다.")
@@ -22,9 +21,9 @@ public class RefreshTokenDto {
       long currentTime
   ) {
 
-    public static Request from(RefreshRequest refreshRequest) {
+    public static Request from(Long memberId, RefreshRequest refreshRequest) {
       return Request.builder()
-          .memberId(refreshRequest.memberId())
+          .memberId(memberId)
           .refreshToken(refreshRequest.refreshToken())
           .currentTime(System.currentTimeMillis())
           .build();

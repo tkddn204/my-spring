@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceTest extends TestSettings {
-
   @Value("${jwt.secret}")
   private String SECRET_KEY;
 
