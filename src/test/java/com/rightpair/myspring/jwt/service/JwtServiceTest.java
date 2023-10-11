@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceTest extends TestSettings {
-  private final static String BEARER_TOKEN_PREFIX = "Bearer ";
-
   @Value("${jwt.secret}")
   private String SECRET_KEY;
 
@@ -84,7 +82,7 @@ class JwtServiceTest extends TestSettings {
       String refreshToken = jwtService.createRefreshToken(subject, System.currentTimeMillis());
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
           .memberId(memberId)
-          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
+          .refreshToken(refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 
@@ -109,7 +107,7 @@ class JwtServiceTest extends TestSettings {
           String.valueOf(memberId), System.currentTimeMillis());
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
           .memberId(anotherMemberId)
-          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
+          .refreshToken(refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 
@@ -129,7 +127,7 @@ class JwtServiceTest extends TestSettings {
           String.valueOf(memberId), 1L);
       RefreshTokenDto.Request request = RefreshTokenDto.Request.builder()
           .memberId(memberId)
-          .refreshToken(BEARER_TOKEN_PREFIX + refreshToken)
+          .refreshToken(refreshToken)
           .currentTime(System.currentTimeMillis())
           .build();
 

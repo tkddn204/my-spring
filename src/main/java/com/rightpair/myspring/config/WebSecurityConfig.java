@@ -33,9 +33,9 @@ public class WebSecurityConfig {
         request -> request.requestMatchers(
 //                AntPathRequestMatcher.antMatcher("/**"),
                 AntPathRequestMatcher.antMatcher("/api/post/**"),
-                AntPathRequestMatcher.antMatcher("/api/member/**"),
-                AntPathRequestMatcher.antMatcher("/api/auth/refresh")
+                AntPathRequestMatcher.antMatcher("/api/member/**")
             ).permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/refresh").authenticated()
             .requestMatchers(HttpMethod.POST, "/api/post").authenticated()
             .requestMatchers(HttpMethod.PUT, "/api/post/**").authenticated()
             .requestMatchers(HttpMethod.DELETE, "/api/post/**").authenticated()

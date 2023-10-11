@@ -66,7 +66,6 @@ public class MemberJwtTest extends TestSettings {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", "bearer " + firstJwtTokenPair.accessToken());
     RefreshTokenDto.RefreshRequest refreshAccessTokenRequest = RefreshTokenDto.RefreshRequest.builder()
-        .memberId(loginResponse.id())
         .grantType("Bearer")
         .refreshToken(firstJwtTokenPair.refreshToken())
         .build();
@@ -111,7 +110,6 @@ public class MemberJwtTest extends TestSettings {
     String invalidAccessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjk1MjI4MDQ1LCJleHAiOjE2OTUyMjg5NDV9.U05ZE12MkEzi0EKuEqpQnwFMYl-5Yhp0x1U3muQm76TQxSgsjzzToInd3Cw8RxbDGNiV2QYFG-8hLhMDi6hq1w";
     headers.add("Authorization", "bearer " + invalidAccessToken);
     RefreshTokenDto.RefreshRequest refreshAccessTokenRequest = RefreshTokenDto.RefreshRequest.builder()
-        .memberId(loginResponse.id())
         .grantType("bearer")
         .refreshToken(firstJwtTokenPair.refreshToken())
         .build();
