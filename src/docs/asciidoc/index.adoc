@@ -15,3 +15,8 @@ include::member/member.adoc[]
 == JWT API
 
 include::jwt/jwt.adoc[]
+
+[[POST-API]]
+== POST API
+
+include::post/post.adoc[]

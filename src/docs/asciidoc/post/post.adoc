@@ -1,0 +1,62 @@
+[[post-get-list]]
+=== 포스트 목록 조회
+
+==== HTTP 요청
+
+include::{snippets}/post-get-list/http-request.adoc[]
+include::{snippets}/post-get-list/query-parameters.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/post-get-list/http-response.adoc[]
+include::{snippets}/post-get-list/response-fields.adoc[]
+
+[[post-get]]
+=== 포스트 조회
+
+==== HTTP 요청
+
+include::{snippets}/post-get/http-request.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/post-get/http-response.adoc[]
+include::{snippets}/post-get/response-fields.adoc[]
+
+[[post-create]]
+=== 포스트 작성
+
+==== HTTP 요청
+
+include::{snippets}/post-create/http-request.adoc[]
+include::{snippets}/post-create/request-fields.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/post-create/http-response.adoc[]
+include::{snippets}/post-create/response-fields.adoc[]
+
+[[post-update]]
+=== 포스트 수정
+
+==== HTTP 요청
+
+include::{snippets}/post-update/http-request.adoc[]
+include::{snippets}/post-update/request-fields.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/post-update/http-response.adoc[]
+include::{snippets}/post-update/response-fields.adoc[]
+
+[[post-delete]]
+=== 포스트 삭제
+
+==== HTTP 요청
+
+include::{snippets}/post-delete/http-request.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/post-delete/http-response.adoc[]
+include::{snippets}/post-delete/response-fields.adoc[]
