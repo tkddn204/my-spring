@@ -62,7 +62,7 @@ public class MemberApiDocsTest extends RestDocsSettings {
                       .attributes(key("constraints").value("Non_Blank, 최대 20자까지"))
               ),
               responseFields(
-                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 아이디"),
+                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 ID"),
                   fieldWithPath("email").type(JsonFieldType.STRING).description("멤버 이메일"),
                   fieldWithPath("nickname").type(JsonFieldType.STRING).description("멤버 닉네임")
               )
@@ -105,7 +105,7 @@ public class MemberApiDocsTest extends RestDocsSettings {
                       .attributes(key("constraints").value("Non_Blank, 8자 이상 32자 이하"))
               ),
               responseFields(
-                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 아이디"),
+                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 ID"),
                   fieldWithPath("email").type(JsonFieldType.STRING).description("멤버 이메일"),
                   fieldWithPath("nickname").type(JsonFieldType.STRING).description("멤버 닉네임"),
                   fieldWithPath("jwtTokenPair['accessToken']").type(JsonFieldType.STRING).description("JWT 액세스 토큰"),
@@ -126,7 +126,7 @@ public class MemberApiDocsTest extends RestDocsSettings {
       Member savedMember = memberRepository.save(member);
 
       // When
-      mockMvc.perform(get("/api/member/{id}", 1)
+      mockMvc.perform(get("/api/member/{id}", savedMember.getId())
               .contentType(MediaType.APPLICATION_JSON)
           )
           // Then
@@ -134,10 +134,10 @@ public class MemberApiDocsTest extends RestDocsSettings {
           .andDo(document("member-get",
               preprocessResponse(prettyPrint()),
               pathParameters(
-                  parameterWithName("id").description("멤버 아이디")
+                  parameterWithName("id").description("멤버 ID")
               ),
               responseFields(
-                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 아이디"),
+                  fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 ID"),
                   fieldWithPath("email").type(JsonFieldType.STRING).description("멤버 이메일"),
                   fieldWithPath("nickname").type(JsonFieldType.STRING).description("멤버 닉네임")
               )

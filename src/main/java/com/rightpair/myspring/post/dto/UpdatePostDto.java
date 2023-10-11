@@ -10,7 +10,6 @@ public class UpdatePostDto {
   @Builder
   public record ControllerRequest
       (
-          Long postId,
           @NotBlank(message = "제목을 입력해주세요.")
           String title,
           @NotBlank(message = "내용을 입력해주세요.")

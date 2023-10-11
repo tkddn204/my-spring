@@ -116,7 +116,7 @@ class PostApiTest extends TestSettings {
     // 2 : 내용이 10자 이하일 경우
     @ValueSource(ints = {0, 1, 2})
     @ParameterizedTest
-    @DisplayName("양식에 맞지 않게 요청을 제출하면 포스트를 작성할 수 있다")
+    @DisplayName("양식에 맞지 않게 요청을 제출하면 포스트를 작성할 수 없다")
     public void shouldFailToCreatePostTestWithInValidData(int postIndex) throws Exception {
       // Given
       // 포스트 요청 생성
@@ -361,19 +361,5 @@ class PostApiTest extends TestSettings {
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errorCode").value("POST_NOT_FOUND"));
     }
-
-//    // TODO: 권한 관련 ArgumentResolver 생성 후 테스트 필요
-//    @Test
-//    @DisplayName("권한 없이 요청할 경우 삭제에 실패한다")
-//    public void shouldFailToDeletePostTestWithNullAuth() throws Exception {
-//      // Given
-//      long originPostId = testPostList.get(0).getId();
-//
-//      // When
-//      mockMvc.perform(delete("/api/post/" + originPostId))
-//          // Then
-//          .andExpect(status().isBadRequest())
-////          .andExpect(jsonPath("$.errorCode").value("BINDING_ERROR"));
-//    }
   }
 }
