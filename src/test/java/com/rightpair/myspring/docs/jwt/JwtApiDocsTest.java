@@ -25,6 +25,8 @@ public class JwtApiDocsTest extends RestDocsSettings {
   @DisplayName("accessToken 재생성")
   @Nested
   class RefreshAccessTokenAPITest {
+    private final static String BEARER_TOKEN_PREFIX = "bearer ";
+
     @DisplayName("accessToken을 재생성할 수 있다.")
     @Test
     void shouldSuccessToRefreshAccessToken() throws Exception {
@@ -33,12 +35,12 @@ public class JwtApiDocsTest extends RestDocsSettings {
       JwtTokenPair jwtTokenPair = jwtService.createJwtTokenPair(memberId);
       RefreshTokenDto.RefreshRequest request = RefreshTokenDto.RefreshRequest.builder()
           .grantType("Bearer")
-          .memberId(memberId)
           .refreshToken(jwtTokenPair.refreshToken())
           .build();
 
       // when
       mockMvc.perform(post("/api/auth/refresh")
+              .header("Authorization", BEARER_TOKEN_PREFIX + jwtTokenPair.accessToken())
               .contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsBytes(request)))
           // then
@@ -47,8 +49,6 @@ public class JwtApiDocsTest extends RestDocsSettings {
               preprocessRequest(prettyPrint()),
               preprocessResponse(prettyPrint()),
               requestFields(
-                  fieldWithPath("memberId").type(JsonFieldType.NUMBER)
-                      .description("멤버 ID"),
                   fieldWithPath("grantType").type(JsonFieldType.STRING)
                       .description("토큰 권한 타입")
                       .attributes(key("constraints").value("Bearer")),

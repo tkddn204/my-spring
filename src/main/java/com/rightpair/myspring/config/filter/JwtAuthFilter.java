@@ -55,7 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   }
 
   private String extractedToken(String token) {
-    if (token.startsWith(JWT_TOKEN_PREFIX)) {
+    if (token.toLowerCase().startsWith(JWT_TOKEN_PREFIX)) {
       return token.substring(JWT_TOKEN_PREFIX.length());
     }
 

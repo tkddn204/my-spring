@@ -2,11 +2,9 @@ package com.rightpair.myspring.integration;
 
 import com.rightpair.myspring.jwt.dto.JwtTokenPair;
 import com.rightpair.myspring.jwt.dto.RefreshTokenDto;
-import com.rightpair.myspring.jwt.service.JwtService;
 import com.rightpair.myspring.member.dto.JoinMemberDto;
 import com.rightpair.myspring.member.dto.LoginMemberDto;
 import com.rightpair.myspring.member.entity.Member;
-import com.rightpair.myspring.member.repository.MemberRepository;
 import com.rightpair.myspring.member.service.MemberService;
 import com.rightpair.myspring.utils.MemberTestFactory;
 import com.rightpair.myspring.utils.TestSettings;
@@ -30,12 +28,6 @@ public class MemberJwtTest extends TestSettings {
 
   @Autowired
   private MemberService memberService;
-
-  @Autowired
-  private MemberRepository memberRepository;
-
-  @Autowired
-  private JwtService jwtService;
 
   @DisplayName("로그인 성공 후 엑세스 토큰 리프레시에 성공한다")
   @Test
