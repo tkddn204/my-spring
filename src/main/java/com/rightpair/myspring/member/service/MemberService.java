@@ -31,7 +31,7 @@ public class MemberService {
 
   @Transactional
   public JoinMemberDto.Response joinMember(JoinMemberDto.Request request) {
-    validateExistedEmail(request);
+    validateExistedEmail(request.email());
 
     Member member = memberRepository.save(
         Member.builder()
@@ -44,8 +44,8 @@ public class MemberService {
     return JoinMemberDto.Response.fromEntity(member);
   }
 
-  private void validateExistedEmail(JoinMemberDto.Request request) {
-    if (memberRepository.existsByEmail(request.email())) {
+  private void validateExistedEmail(String email) {
+    if (memberRepository.existsByEmail(email)) {
       throw new ExistedEmailException();
     }
   }

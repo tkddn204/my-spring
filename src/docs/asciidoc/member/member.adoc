@@ -1,5 +1,5 @@
 [[member-join]]
-=== 유저 회원가입
+=== 멤버 회원가입
 
 ==== HTTP 요청
 
@@ -10,3 +10,27 @@ include::{snippets}/member-join/request-fields.adoc[]
 
 include::{snippets}/member-join/http-response.adoc[]
 include::{snippets}/member-join/response-fields.adoc[]
+
+=== 멤버 로그인
+
+==== HTTP 요청
+
+include::{snippets}/member-login/http-request.adoc[]
+include::{snippets}/member-login/request-fields.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/member-login/http-response.adoc[]
+include::{snippets}/member-login/response-fields.adoc[]
+
+=== 멤버 조회
+
+==== HTTP 요청
+
+include::{snippets}/member-get/http-request.adoc[]
+include::{snippets}/member-get/path-parameters.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/member-get/http-response.adoc[]
+include::{snippets}/member-get/response-fields.adoc[]
