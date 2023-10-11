@@ -1,0 +1,12 @@
+[[member-join]]
+=== 액세스 토큰 재생성
+
+==== HTTP 요청
+
+include::{snippets}/jwt-refreshAccessToken/http-request.adoc[]
+include::{snippets}/jwt-refreshAccessToken/request-fields.adoc[]
+
+==== HTTP 응답
+
+include::{snippets}/jwt-refreshAccessToken/http-response.adoc[]
+include::{snippets}/jwt-refreshAccessToken/response-fields.adoc[]

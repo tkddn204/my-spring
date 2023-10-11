@@ -10,3 +10,8 @@
 == Member API
 
 include::member/member.adoc[]
+
+[[JWT-API]]
+== JWT API
+
+include::jwt/jwt.adoc[]
