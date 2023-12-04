@@ -34,7 +34,8 @@ class MemberRepositoryTest extends TestSettings {
 
       // then
       assertTrue(foundMember.isPresent());
-      assertEquals(member, foundMember.get());
+      assertEquals(member.getId(), foundMember.get().getId());
+      assertEquals(member.getEmail(), foundMember.get().getEmail());
     }
 
 

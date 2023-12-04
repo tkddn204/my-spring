@@ -37,3 +37,4 @@ out/
 
 ### private files ###
 src/**/application-*.yml
+.env
